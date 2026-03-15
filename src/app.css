@@ -1,0 +1,344 @@
+/* === VARIABLES === */
+:root {
+	--parchment: #f5efe3;
+	--parchment-deep: #e8dcc8;
+	--ink: #2b2118;
+	--ink-soft: #5c4d3e;
+	--verde: #3a6b35;
+	--verde-deep: #2d5016;
+	--terra: #c2633a;
+	--terra-glow: #c2633a18;
+	--sage: #8fa97e;
+	--sage-pale: #c5d4b8;
+	--font-display: 'Fraunces', serif;
+	--font-body: 'Literata', serif;
+}
+
+/* === RESET === */
+*,
+*::before,
+*::after {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+/* === BODY === */
+body {
+	font-family: var(--font-body);
+	background: var(--parchment);
+	color: var(--ink);
+	min-height: 100vh;
+	-webkit-font-smoothing: antialiased;
+}
+
+/* Warm parchment texture */
+body::before {
+	content: '';
+	position: fixed;
+	inset: 0;
+	background:
+		radial-gradient(ellipse at 0% 0%, rgba(194, 99, 58, 0.06) 0%, transparent 50%),
+		radial-gradient(ellipse at 100% 100%, rgba(58, 107, 53, 0.06) 0%, transparent 50%),
+		linear-gradient(180deg, var(--parchment) 0%, var(--parchment-deep) 100%);
+	pointer-events: none;
+	z-index: 0;
+}
+
+/* Organic dot pattern */
+body::after {
+	content: '';
+	position: fixed;
+	inset: 0;
+	background-image: radial-gradient(circle, rgba(43, 33, 24, 0.04) 1px, transparent 1px);
+	background-size: 20px 20px;
+	pointer-events: none;
+	z-index: 0;
+}
+
+/* === TYPOGRAPHY === */
+h1,
+h2,
+h3 {
+	font-family: var(--font-display);
+	font-weight: 600;
+	line-height: 1.3;
+}
+
+/* === WORDMARK === */
+.wordmark {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 2rem;
+	color: var(--verde-deep);
+	letter-spacing: 0.02em;
+}
+
+.wordmark .dot {
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	background: var(--terra);
+	border-radius: 50%;
+	margin-left: 2px;
+	vertical-align: middle;
+	position: relative;
+	top: -2px;
+}
+
+.tagline {
+	font-family: var(--font-display);
+	font-style: italic;
+	font-weight: 400;
+	font-size: 0.85rem;
+	color: var(--ink-soft);
+}
+
+/* === VINE DIVIDER === */
+.vine {
+	display: flex;
+	align-items: center;
+	padding: 20px 24px 12px;
+	gap: 10px;
+}
+
+.vine::before,
+.vine::after {
+	content: '';
+	flex: 1;
+	height: 2px;
+	background: linear-gradient(90deg, transparent, var(--sage-pale));
+	border-radius: 1px;
+}
+
+.vine::after {
+	background: linear-gradient(90deg, var(--sage-pale), transparent);
+}
+
+.vine span {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 0.7rem;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+	color: var(--verde);
+}
+
+/* === CARDS === */
+.card {
+	margin: 8px 16px;
+	padding: 20px;
+	background: #fff;
+	border-radius: 14px;
+	box-shadow: 0 2px 12px rgba(43, 33, 24, 0.06);
+	position: relative;
+	overflow: hidden;
+	animation: grow-in 0.5s ease both;
+}
+
+.card::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 3px;
+	background: linear-gradient(90deg, var(--verde), var(--sage), var(--terra));
+	opacity: 0;
+	transition: opacity 0.3s;
+}
+
+.card:hover::before,
+.card:active::before {
+	opacity: 1;
+}
+
+.card:nth-child(2) { animation-delay: 0.06s; }
+.card:nth-child(3) { animation-delay: 0.12s; }
+.card:nth-child(4) { animation-delay: 0.18s; }
+.card:nth-child(5) { animation-delay: 0.24s; }
+.card:nth-child(6) { animation-delay: 0.30s; }
+.card:nth-child(7) { animation-delay: 0.36s; }
+.card:nth-child(8) { animation-delay: 0.42s; }
+
+/* === TAGS === */
+.tags {
+	display: flex;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+
+.tag {
+	font-family: var(--font-display);
+	font-size: 0.68rem;
+	font-weight: 600;
+	padding: 4px 11px;
+	border-radius: 20px;
+	background: rgba(58, 107, 53, 0.08);
+	color: var(--verde);
+	letter-spacing: 0.02em;
+}
+
+.tag.warm {
+	background: var(--terra-glow);
+	color: var(--terra);
+}
+
+/* === FORMS === */
+input,
+textarea,
+select {
+	font-family: var(--font-body);
+	font-size: 1rem;
+	color: var(--ink);
+	background: #fff;
+	border: 2px solid var(--sage-pale);
+	border-radius: 10px;
+	padding: 12px 16px;
+	width: 100%;
+	outline: none;
+	transition: border-color 0.2s;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+	border-color: var(--verde);
+}
+
+input::placeholder,
+textarea::placeholder {
+	color: var(--ink-soft);
+	opacity: 0.6;
+}
+
+textarea {
+	resize: vertical;
+	min-height: 100px;
+}
+
+label {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 0.85rem;
+	color: var(--ink);
+	display: block;
+	margin-bottom: 6px;
+}
+
+/* === BUTTONS === */
+button,
+.btn {
+	font-family: var(--font-display);
+	font-weight: 600;
+	font-size: 0.9rem;
+	letter-spacing: 0.04em;
+	cursor: pointer;
+	border: none;
+	border-radius: 10px;
+	padding: 12px 24px;
+	transition: all 0.2s;
+}
+
+.btn-primary,
+button[type='submit'] {
+	background: var(--verde);
+	color: var(--parchment);
+}
+
+.btn-primary:hover,
+button[type='submit']:hover {
+	background: var(--verde-deep);
+}
+
+.btn-primary:disabled,
+button[type='submit']:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.btn-secondary {
+	background: rgba(58, 107, 53, 0.08);
+	color: var(--verde);
+}
+
+.btn-secondary:hover {
+	background: rgba(58, 107, 53, 0.15);
+}
+
+.btn-danger {
+	background: rgba(194, 99, 58, 0.1);
+	color: var(--terra);
+}
+
+.btn-danger:hover {
+	background: rgba(194, 99, 58, 0.2);
+}
+
+/* === FAB === */
+.fab {
+	position: fixed;
+	bottom: 86px;
+	right: calc(50% - 190px);
+	width: 52px;
+	height: 52px;
+	border-radius: 16px;
+	background: var(--verde);
+	color: var(--parchment);
+	border: none;
+	font-size: 1.6rem;
+	font-weight: 300;
+	cursor: pointer;
+	box-shadow: 0 4px 20px rgba(58, 107, 53, 0.25);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 10;
+	transition:
+		transform 0.2s,
+		border-radius 0.3s;
+	text-decoration: none;
+}
+
+.fab:hover {
+	transform: scale(1.08);
+	border-radius: 50%;
+}
+
+/* === RECIPE META === */
+.recipe-meta {
+	display: flex;
+	gap: 14px;
+	font-size: 0.78rem;
+	color: var(--ink-soft);
+	margin-bottom: 12px;
+}
+
+/* === ANIMATIONS === */
+@keyframes grow-in {
+	from {
+		opacity: 0;
+		transform: scale(0.96) translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1) translateY(0);
+	}
+}
+
+@keyframes fade-in {
+	from { opacity: 0; transform: translateY(8px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+/* === ERROR MESSAGE === */
+.error {
+	color: var(--terra);
+	font-size: 0.85rem;
+	margin-top: 8px;
+}
+
+/* === UTILITY === */
+.spacer {
+	height: 100px;
+}
