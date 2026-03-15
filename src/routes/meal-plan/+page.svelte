@@ -231,25 +231,26 @@
 		background: rgba(43, 33, 24, 0.4);
 		z-index: 100;
 		display: flex;
-		align-items: flex-end;
+		align-items: center;
 		justify-content: center;
+		padding: 24px 16px;
 	}
 
 	.picker {
 		background: var(--parchment);
 		width: 100%;
 		max-width: 420px;
-		max-height: 70vh;
-		border-radius: 20px 20px 0 0;
+		max-height: 80vh;
+		border-radius: 20px;
 		padding: 20px;
 		display: flex;
 		flex-direction: column;
-		animation: slide-up 0.3s ease;
+		animation: picker-in 0.25s ease;
 	}
 
-	@keyframes slide-up {
-		from { transform: translateY(100%); }
-		to { transform: translateY(0); }
+	@keyframes picker-in {
+		from { opacity: 0; transform: scale(0.95); }
+		to { opacity: 1; transform: scale(1); }
 	}
 
 	.picker-header {
