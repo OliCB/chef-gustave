@@ -1,6 +1,17 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+	import { formatWeekLabel } from '$lib/week';
+
 	let { data } = $props();
 	let copied = $state(false);
+
+	let weekLabel = $derived(formatWeekLabel(data.weekOffset));
+
+	function navigateWeek(direction: -1 | 1) {
+		const newOffset = data.weekOffset + direction;
+		const params = newOffset === 0 ? '' : `?week=${newOffset}`;
+		goto(`/grocery-list${params}`);
+	}
 
 	function formatItem(item: { name: string; quantity: number | null; unit: string | null }): string {
 		const parts: string[] = [];
@@ -40,6 +51,12 @@
 
 <div class="vine"><span>Liste d'épicerie</span></div>
 
+<div class="week-nav">
+	<button class="week-arrow" onclick={() => navigateWeek(-1)}>←</button>
+	<span class="week-label">{weekLabel}</span>
+	<button class="week-arrow" onclick={() => navigateWeek(1)}>→</button>
+</div>
+
 {#if data.items.length === 0}
 	<p class="empty-state">
 		Aucun ingrédient — ajoutez des recettes au plan de la semaine.
@@ -70,6 +87,41 @@
 {/if}
 
 <style>
+	.week-nav {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 16px;
+		padding: 4px 16px 16px;
+	}
+
+	.week-arrow {
+		width: 36px;
+		height: 36px;
+		border-radius: 10px;
+		background: rgba(58, 107, 53, 0.08);
+		color: var(--verde);
+		font-size: 1.1rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0;
+	}
+
+	.week-arrow:hover {
+		background: var(--verde);
+		color: var(--parchment);
+	}
+
+	.week-label {
+		font-family: var(--font-display);
+		font-weight: 600;
+		font-size: 0.95rem;
+		color: var(--ink);
+		min-width: 160px;
+		text-align: center;
+	}
+
 	.empty-state {
 		text-align: center;
 		color: var(--ink-soft);

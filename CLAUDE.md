@@ -10,7 +10,7 @@ Meal planning PWA for a 2-person francophone household.
 
 ## Stack
 
-SvelteKit (PWA) · Supabase (PostgreSQL) · Vercel · Claude API · Edamam API
+SvelteKit (PWA) · Supabase (PostgreSQL) · Vercel · Gemini API · Edamam API
 
 ## Frontend Design
 

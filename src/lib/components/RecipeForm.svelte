@@ -101,6 +101,10 @@
 
 	async function handleSubmit() {
 		if (!name.trim()) return;
+		// Flush any pending tag input
+		if (tagInput.trim()) {
+			addTag(tagInput);
+		}
 		saving = true;
 
 		const body: RecipeFormData = {

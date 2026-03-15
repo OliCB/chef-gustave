@@ -7,7 +7,7 @@
 | Framework | SvelteKit (PWA) |
 | Database | Supabase (PostgreSQL) |
 | Hosting | Vercel |
-| LLM | Claude API (recipe extraction + ingredient parsing + translation) |
+| LLM | Gemini API (recipe extraction + ingredient parsing + translation) |
 | Nutrition | Edamam API |
 | Auth | Shared password + server-side JWT (no expiry) |
 
@@ -107,7 +107,7 @@ Computed at query time — no table. Aggregates ingredients from all recipes in 
                                │
                     ┌──────────┼──────────┐
                     ▼          ▼          ▼
-               Claude API   Edamam    Web scraper
+               Gemini API   Edamam    Web scraper
                (recipe      (nutrition) (recipe URL
                 extraction)              fetch)
 ```
@@ -159,13 +159,13 @@ Look for JSON-LD (schema.org/Recipe)
   ┌────┴────┐
   │ Found   │ Not found
   ▼         ▼
-Parse       Send HTML to Claude API
+Parse       Send HTML to Gemini API
 structured  "Extract the recipe from this page"
 data
   │         │
   └────┬────┘
        ▼
-Claude parses ingredients into
+Gemini parses ingredients into
 structured fields (quantity/unit/name)
 + translates everything to French
        │
@@ -176,8 +176,8 @@ Return to client → populate form
 User reviews, edits, saves
 ```
 
-- Claude always handles ingredient parsing (even from JSON-LD, since ingredients are often plain strings like "1 1/2 tasses de farine tout usage, tamisée")
-- Claude translates to French if the source is in another language
+- Gemini always handles ingredient parsing (even from JSON-LD, since ingredients are often plain strings like "1 1/2 tasses de farine tout usage, tamisée")
+- Gemini translates to French if the source is in another language
 - If the HTML fetch fails, user falls back to manual entry
 
 ## Grocery List Logic

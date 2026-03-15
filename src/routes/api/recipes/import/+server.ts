@@ -1,7 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { env } from '$env/dynamic/private';
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenAI } from '@google/genai';
 
 const EXTRACTION_PROMPT = `You are a recipe extraction assistant. Extract the recipe from the provided content and return it as a JSON object.
 
@@ -31,7 +31,6 @@ function extractJsonLd(html: string): Record<string, any> | null {
 	while ((match = regex.exec(html)) !== null) {
 		try {
 			const data = JSON.parse(match[1]);
-			// Could be a single object or array
 			if (Array.isArray(data)) {
 				const recipe = data.find((d: any) => d['@type'] === 'Recipe');
 				if (recipe) return recipe;
@@ -54,9 +53,9 @@ export const POST: RequestHandler = async ({ request }) => {
 		error(400, 'URL requise');
 	}
 
-	const apiKey = env.ANTHROPIC_API_KEY;
+	const apiKey = env.GEMINI_API_KEY;
 	if (!apiKey) {
-		error(500, 'Clé API Anthropic manquante');
+		error(500, 'Clé API Gemini manquante');
 	}
 
 	// Fetch the page HTML
@@ -78,35 +77,26 @@ export const POST: RequestHandler = async ({ request }) => {
 	// Try JSON-LD first
 	const jsonLd = extractJsonLd(html);
 
-	let contentForClaude: string;
+	let userMessage: string;
 	if (jsonLd) {
-		contentForClaude = `Here is structured recipe data (JSON-LD) extracted from a web page. Parse the ingredients into structured fields and translate everything to French:\n\n${JSON.stringify(jsonLd, null, 2)}`;
+		userMessage = `Here is structured recipe data (JSON-LD) extracted from a web page. Parse the ingredients into structured fields and translate everything to French:\n\n${JSON.stringify(jsonLd, null, 2)}`;
 	} else {
-		// Trim HTML to a reasonable size
 		const trimmed = html.substring(0, 50000);
-		contentForClaude = `Extract the recipe from this HTML page and translate everything to French:\n\n${trimmed}`;
+		userMessage = `Extract the recipe from this HTML page and translate everything to French:\n\n${trimmed}`;
 	}
 
-	const client = new Anthropic({ apiKey });
-	const message = await client.messages.create({
-		model: 'claude-sonnet-4-20250514',
-		max_tokens: 2000,
-		messages: [
-			{
-				role: 'user',
-				content: contentForClaude
-			}
-		],
-		system: EXTRACTION_PROMPT
+	const ai = new GoogleGenAI({ apiKey });
+	const response = await ai.models.generateContent({
+		model: 'gemini-2.0-flash-lite',
+		contents: `${EXTRACTION_PROMPT}\n\n${userMessage}`,
+		config: {
+			responseMimeType: 'application/json'
+		}
 	});
 
-	// Extract text response
-	const text = message.content
-		.filter((b): b is Anthropic.TextBlock => b.type === 'text')
-		.map((b) => b.text)
-		.join('');
+	const text = response.text ?? '';
 
-	// Parse JSON from response (handle markdown code blocks)
+	// Parse JSON from response (handle markdown code blocks just in case)
 	const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/) || [null, text];
 	try {
 		const recipe = JSON.parse(jsonMatch[1]!.trim());

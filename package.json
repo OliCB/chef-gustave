@@ -21,7 +21,7 @@
     "vite": "^6.0.0"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.78.0",
+    "@google/genai": "^1.45.0",
     "@supabase/supabase-js": "^2.0.0",
     "bcryptjs": "^2.4.3",
     "jose": "^5.0.0"

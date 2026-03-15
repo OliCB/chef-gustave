@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { invalidateAll } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
+	import { formatWeekLabel } from '$lib/week';
 
 	let { data } = $props();
 
@@ -11,7 +12,8 @@
 	let pickerMeal = $state<string>('');
 	let searchQuery = $state('');
 
-	// Generate the 7 days of the week
+	let weekLabel = $derived(formatWeekLabel(data.weekOffset));
+
 	let days = $derived(() => {
 		const result: { date: string; label: string }[] = [];
 		const start = new Date(data.weekStart + 'T00:00:00');
@@ -25,6 +27,12 @@
 		}
 		return result;
 	});
+
+	function navigateWeek(direction: -1 | 1) {
+		const newOffset = data.weekOffset + direction;
+		const params = newOffset === 0 ? '' : `?week=${newOffset}`;
+		goto(`/meal-plan${params}`);
+	}
 
 	function getEntry(date: string, mealType: string) {
 		return data.entries.find(
@@ -74,6 +82,12 @@
 </svelte:head>
 
 <div class="vine"><span>Plan de la semaine</span></div>
+
+<div class="week-nav">
+	<button class="week-arrow" onclick={() => navigateWeek(-1)}>←</button>
+	<span class="week-label">{weekLabel}</span>
+	<button class="week-arrow" onclick={() => navigateWeek(1)}>→</button>
+</div>
 
 <div class="week-grid">
 	{#each days() as day}
@@ -133,6 +147,41 @@
 {/if}
 
 <style>
+	.week-nav {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 16px;
+		padding: 4px 16px 16px;
+	}
+
+	.week-arrow {
+		width: 36px;
+		height: 36px;
+		border-radius: 10px;
+		background: rgba(58, 107, 53, 0.08);
+		color: var(--verde);
+		font-size: 1.1rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0;
+	}
+
+	.week-arrow:hover {
+		background: var(--verde);
+		color: var(--parchment);
+	}
+
+	.week-label {
+		font-family: var(--font-display);
+		font-weight: 600;
+		font-size: 0.95rem;
+		color: var(--ink);
+		min-width: 160px;
+		text-align: center;
+	}
+
 	.week-grid {
 		display: flex;
 		flex-direction: column;
