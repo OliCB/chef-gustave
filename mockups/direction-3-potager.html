@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Chef Gustave — Potager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,500;1,7..72,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --parchment: #f5efe3;
+    --parchment-deep: #e8dcc8;
+    --ink: #2b2118;
+    --ink-soft: #5c4d3e;
+    --verde: #3a6b35;
+    --verde-deep: #2d5016;
+    --terra: #c2633a;
+    --terra-glow: #c2633a18;
+    --sage: #8fa97e;
+    --sage-pale: #c5d4b8;
+    --font-display: 'Fraunces', serif;
+    --font-body: 'Literata', serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--parchment);
+    color: var(--ink);
+    max-width: 420px;
+    margin: 0 auto;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  /* Warm parchment texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 0% 0%, rgba(194, 99, 58, 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 100% 100%, rgba(58, 107, 53, 0.06) 0%, transparent 50%),
+      linear-gradient(180deg, var(--parchment) 0%, var(--parchment-deep) 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Subtle organic dot pattern */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(43, 33, 24, 0.04) 1px, transparent 1px);
+    background-size: 20px 20px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .content { position: relative; z-index: 1; }
+
+  /* Header */
+  header {
+    padding: 52px 24px 20px;
+    text-align: center;
+  }
+
+  header .wordmark {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 2rem;
+    color: var(--verde-deep);
+    letter-spacing: 0.02em;
+    margin-bottom: 2px;
+  }
+
+  header .wordmark .dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: var(--terra);
+    border-radius: 50%;
+    margin-left: 2px;
+    vertical-align: middle;
+    position: relative;
+    top: -2px;
+  }
+
+  header .tagline {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+  }
+
+  /* Organic divider */
+  .vine {
+    display: flex;
+    align-items: center;
+    padding: 20px 24px 12px;
+    gap: 10px;
+  }
+
+  .vine::before, .vine::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--sage-pale));
+    border-radius: 1px;
+  }
+
+  .vine::after {
+    background: linear-gradient(90deg, var(--sage-pale), transparent);
+  }
+
+  .vine span {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--verde);
+  }
+
+  /* Recipe cards */
+  .recipe-card {
+    margin: 8px 16px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(43, 33, 24, 0.06);
+    position: relative;
+    overflow: hidden;
+    animation: grow-in 0.5s ease both;
+  }
+
+  .recipe-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--verde), var(--sage), var(--terra));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .recipe-card:hover::before { opacity: 1; }
+
+  .recipe-card:nth-child(2) { animation-delay: 0.06s; }
+  .recipe-card:nth-child(3) { animation-delay: 0.12s; }
+  .recipe-card:nth-child(4) { animation-delay: 0.18s; }
+
+  @keyframes grow-in {
+    from { opacity: 0; transform: scale(0.96) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .recipe-card h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.15rem;
+    margin-bottom: 8px;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+
+  .recipe-meta {
+    display: flex;
+    gap: 14px;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+  }
+
+  .tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-family: var(--font-display);
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 4px 11px;
+    border-radius: 20px;
+    background: rgba(58, 107, 53, 0.08);
+    color: var(--verde);
+    letter-spacing: 0.02em;
+  }
+
+  .tag.warm {
+    background: var(--terra-glow);
+    color: var(--terra);
+  }
+
+  /* Bottom nav */
+  nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0 28px;
+    background: linear-gradient(transparent, var(--parchment) 35%);
+    z-index: 10;
+  }
+
+  nav a {
+    text-decoration: none;
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    text-align: center;
+    padding: 8px 18px;
+    border-radius: 10px;
+    transition: all 0.25s;
+  }
+
+  nav a.active {
+    color: var(--verde-deep);
+    background: rgba(58, 107, 53, 0.1);
+  }
+
+  /* FAB */
+  .fab {
+    position: fixed;
+    bottom: 86px;
+    right: calc(50% - 190px);
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: var(--verde);
+    color: var(--parchment);
+    border: none;
+    font-size: 1.6rem;
+    font-weight: 300;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(58, 107, 53, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: transform 0.2s, border-radius 0.3s;
+  }
+
+  .fab:hover {
+    transform: scale(1.08);
+    border-radius: 50%;
+  }
+
+  .spacer { height: 100px; }
+</style>
+</head>
+<body>
+<div class="content">
+  <header>
+    <div class="wordmark">Chef Gustave<span class="dot"></span></div>
+    <div class="tagline">le carnet gourmand</div>
+  </header>
+
+  <div class="vine"><span>Recettes</span></div>
+
+  <div class="recipe-card">
+    <h3>Poulet rôti au citron et thym</h3>
+    <div class="recipe-meta">
+      <span>25 min prep</span>
+      <span>1h15 cuisson</span>
+      <span>4 portions</span>
+    </div>
+    <div class="tags">
+      <span class="tag">volaille</span>
+      <span class="tag warm">rapide</span>
+      <span class="tag">classique</span>
+    </div>
+  </div>
+
+  <div class="recipe-card">
+    <h3>Soupe à l'oignon gratinée</h3>
+    <div class="recipe-meta">
+      <span>30 min prep</span>
+      <span>45 min cuisson</span>
+      <span>2 portions</span>
+    </div>
+    <div class="tags">
+      <span class="tag">soupe</span>
+      <span class="tag">réconfort</span>
+    </div>
+  </div>
+
+  <div class="recipe-card">
+    <h3>Tarte tatin aux tomates cerises</h3>
+    <div class="recipe-meta">
+      <span>20 min prep</span>
+      <span>35 min cuisson</span>
+      <span>2 portions</span>
+    </div>
+    <div class="tags">
+      <span class="tag warm">végétarien</span>
+      <span class="tag">été</span>
+    </div>
+  </div>
+
+  <div class="recipe-card">
+    <h3>Risotto aux champignons sauvages</h3>
+    <div class="recipe-meta">
+      <span>10 min prep</span>
+      <span>30 min cuisson</span>
+      <span>2 portions</span>
+    </div>
+    <div class="tags">
+      <span class="tag warm">végétarien</span>
+      <span class="tag">automne</span>
+      <span class="tag">réconfort</span>
+    </div>
+  </div>
+
+  <div class="spacer"></div>
+</div>
+
+<button class="fab">+</button>
+
+<nav>
+  <a href="#" class="active">Recettes</a>
+  <a href="#">Plan</a>
+  <a href="#">Épicerie</a>
+</nav>
+</body>
+</html>
