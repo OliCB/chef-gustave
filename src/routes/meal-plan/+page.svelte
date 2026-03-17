@@ -14,6 +14,16 @@
 
 	let weekLabel = $derived(formatWeekLabel(data.weekOffset));
 
+	const today = new Date().toISOString().split('T')[0];
+
+	function scrollToday(node: HTMLElement) {
+		if (node.classList.contains('today')) {
+			requestAnimationFrame(() => {
+				node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+			});
+		}
+	}
+
 	let days = $derived(() => {
 		const result: { date: string; label: string }[] = [];
 		const start = new Date(data.weekStart + 'T00:00:00');
@@ -91,7 +101,11 @@
 
 <div class="week-grid">
 	{#each days() as day}
-		<div class="day-column card">
+		<div
+			class="day-column card"
+			class:today={day.date === today}
+			use:scrollToday
+		>
 			<h3 class="day-name">{day.label}</h3>
 			<div class="day-date">{new Date(day.date + 'T00:00:00').toLocaleDateString('fr-CA', { day: 'numeric', month: 'short' })}</div>
 
@@ -192,6 +206,10 @@
 	.day-column {
 		padding: 14px 16px;
 		margin: 4px 0;
+	}
+
+	.day-column.today::before {
+		opacity: 1;
 	}
 
 	.day-name {
