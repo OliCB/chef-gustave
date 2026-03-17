@@ -87,7 +87,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	const ai = new GoogleGenAI({ apiKey });
 	const response = await ai.models.generateContent({
-		model: 'gemini-2.0-flash-lite',
+		model: 'gemini-2.5-flash',
 		contents: `${EXTRACTION_PROMPT}\n\n${userMessage}`,
 		config: {
 			responseMimeType: 'application/json'
