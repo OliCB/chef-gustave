@@ -21,7 +21,6 @@ Return ONLY valid JSON with this exact structure:
     { "name": "string", "quantity": number or null, "unit": "string or null" }
   ],
   "steps": ["string"],
-  "tags": ["string"],
   "notes": "string or null"
 }`;
 
@@ -47,19 +46,32 @@ function extractJsonLd(html: string): Record<string, any> | null {
 	return null;
 }
 
-export const POST: RequestHandler = async ({ request }) => {
-	const { url } = await request.json();
-	if (!url || typeof url !== 'string') {
-		error(400, 'URL requise');
-	}
+/** Parse ISO 8601 duration (e.g. "PT1H20M", "PT45M") to minutes */
+function parseDuration(iso: string | undefined | null): number | null {
+	if (!iso || typeof iso !== 'string') return null;
+	const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?/);
+	if (!match) return null;
+	return (parseInt(match[1] || '0', 10) * 60) + parseInt(match[2] || '0', 10) || null;
+}
 
-	const apiKey = env.GEMINI_API_KEY;
-	if (!apiKey) {
-		error(500, 'Clé API Gemini manquante');
-	}
+/** Parse servings from recipeYield (e.g. "4", "4 servings", ["4"]) */
+function parseServings(yield_: any): number | null {
+	if (!yield_) return null;
+	const str = Array.isArray(yield_) ? yield_[0] : String(yield_);
+	const match = str.match(/(\d+)/);
+	return match ? parseInt(match[1], 10) : null;
+}
 
-	// Fetch the page HTML
-	let html: string;
+/** Strip JSON-LD to only the fields we need for AI processing */
+function stripJsonLd(jsonLd: Record<string, any>) {
+	return {
+		name: jsonLd.name,
+		recipeIngredient: jsonLd.recipeIngredient,
+		recipeInstructions: jsonLd.recipeInstructions
+	};
+}
+
+async function fetchHtml(url: string): Promise<string> {
 	try {
 		const res = await fetch(url, {
 			headers: {
@@ -68,21 +80,39 @@ export const POST: RequestHandler = async ({ request }) => {
 			}
 		});
 		if (!res.ok) error(400, `Impossible de récupérer la page (${res.status})`);
-		html = await res.text();
+		return await res.text();
 	} catch (e: any) {
 		if (e.status) throw e;
 		error(400, 'Impossible de récupérer la page');
 	}
+}
 
-	// Try JSON-LD first
+export const POST: RequestHandler = async ({ request }) => {
+	const { url } = await request.json();
+	if (!url || typeof url !== 'string') {
+		error(400, 'URL requise');
+	}
+
+	const html = await fetchHtml(url);
 	const jsonLd = extractJsonLd(html);
+
+	// Extract what we can algorithmically from JSON-LD
+	const prepTime = jsonLd ? parseDuration(jsonLd.prepTime) : null;
+	const cookTime = jsonLd ? parseDuration(jsonLd.cookTime) : null;
+	const servings = jsonLd ? parseServings(jsonLd.recipeYield) : null;
 
 	let userMessage: string;
 	if (jsonLd) {
-		userMessage = `Here is structured recipe data (JSON-LD) extracted from a web page. Parse the ingredients into structured fields and translate everything to French:\n\n${JSON.stringify(jsonLd, null, 2)}`;
+		const stripped = stripJsonLd(jsonLd);
+		userMessage = `Here is structured recipe data (JSON-LD) extracted from a web page. Parse the ingredients into structured fields and translate everything to French:\n\n${JSON.stringify(stripped, null, 2)}`;
 	} else {
 		const trimmed = html.substring(0, 50000);
 		userMessage = `Extract the recipe from this HTML page and translate everything to French:\n\n${trimmed}`;
+	}
+
+	const apiKey = env.GEMINI_API_KEY;
+	if (!apiKey) {
+		error(500, 'Clé API Gemini manquante');
 	}
 
 	const ai = new GoogleGenAI({ apiKey });
@@ -96,12 +126,18 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	const text = response.text ?? '';
 
-	// Parse JSON from response (handle markdown code blocks just in case)
 	const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/) || [null, text];
 	try {
 		const recipe = JSON.parse(jsonMatch[1]!.trim());
+
+		// Override with algorithmically parsed values when available from JSON-LD
+		if (prepTime !== null) recipe.prep_time = prepTime;
+		if (cookTime !== null) recipe.cook_time = cookTime;
+		if (servings !== null) recipe.servings = servings;
+
 		return json({
 			...recipe,
+			tags: [],
 			source_url: url
 		});
 	} catch {
