@@ -70,7 +70,6 @@
 				{wakeLockActive ? '☀' : '☾'}
 			</button>
 			<a href="/recipes/{recipe.id}/edit" class="btn-icon" title="Modifier">✎</a>
-			<button class="btn-icon danger" onclick={handleDelete} title="Supprimer">✕</button>
 		</div>
 	</div>
 
@@ -161,6 +160,13 @@
 			<a href={recipe.source_url} target="_blank" rel="noopener">Voir la recette originale ↗</a>
 		</div>
 	{/if}
+
+	<div class="delete-section">
+		<button class="delete-btn" onclick={handleDelete}>
+			<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+			Supprimer
+		</button>
+	</div>
 </div>
 
 <style>
@@ -308,5 +314,26 @@
 	.nutrition-fetch {
 		padding: 12px 24px;
 		text-align: center;
+	}
+
+	.delete-section {
+		padding: 32px 24px 16px;
+	}
+
+	.delete-btn {
+		width: 100%;
+		padding: 14px;
+		font-size: 1rem;
+		background: var(--terra);
+		color: var(--parchment);
+		border-radius: 10px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 10px;
+	}
+
+	.delete-btn:hover {
+		background: #a8502a;
 	}
 </style>
