@@ -2,10 +2,12 @@
 	import '../app.css';
 	import { page } from '$app/stores';
 	import type { Snippet } from 'svelte';
+	import Toaster from '$lib/components/Toaster.svelte';
 
 	let { children }: { children: Snippet } = $props();
 </script>
 
+<Toaster />
 <div class="app-shell">
 	<div class="content">
 		{@render children()}

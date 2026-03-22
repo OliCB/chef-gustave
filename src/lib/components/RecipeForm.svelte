@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import type { RecipeFormData, Recipe } from '$lib/types';
+	import { toast } from '$lib/toast';
 
 	let {
 		recipe = undefined,
@@ -138,6 +139,7 @@
 			const data = await res.json();
 			goto(`/recipes/${recipe?.id || data.id}`);
 		} else {
+			toast.error("Erreur lors de l'enregistrement");
 			saving = false;
 		}
 	}

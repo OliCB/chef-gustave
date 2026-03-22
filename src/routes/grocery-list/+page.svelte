@@ -3,45 +3,12 @@
 	import { formatWeekLabel } from '$lib/week';
 
 	let { data } = $props();
-	let copied = $state(false);
-
 	let weekLabel = $derived(formatWeekLabel(data.weekOffset));
 
 	function navigateWeek(direction: -1 | 1) {
 		const newOffset = data.weekOffset + direction;
 		const params = newOffset === 0 ? '' : `?week=${newOffset}`;
 		goto(`/grocery-list${params}`);
-	}
-
-	function formatItem(item: { name: string; quantity: number | null; unit: string | null }): string {
-		const parts: string[] = [];
-		if (item.quantity !== null) {
-			// Format quantity: remove trailing zeros
-			const qty = Number(item.quantity);
-			parts.push(qty % 1 === 0 ? qty.toString() : qty.toFixed(1));
-		}
-		if (item.unit) parts.push(item.unit);
-		parts.push(item.name);
-		return parts.join(' ');
-	}
-
-	async function copyToClipboard() {
-		const text = data.items.map(formatItem).join('\n');
-		try {
-			await navigator.clipboard.writeText(text);
-			copied = true;
-			setTimeout(() => (copied = false), 2000);
-		} catch {
-			// Fallback
-			const textarea = document.createElement('textarea');
-			textarea.value = text;
-			document.body.appendChild(textarea);
-			textarea.select();
-			document.execCommand('copy');
-			document.body.removeChild(textarea);
-			copied = true;
-			setTimeout(() => (copied = false), 2000);
-		}
 	}
 </script>
 
@@ -64,9 +31,6 @@
 {:else}
 	<div class="grocery-header">
 		<span class="item-count">{data.items.length} ingrédient{data.items.length > 1 ? 's' : ''}</span>
-		<button class="btn-secondary copy-btn" onclick={copyToClipboard}>
-			{copied ? '✓ Copié' : 'Copier'}
-		</button>
 	</div>
 
 	<ul class="grocery-list">
@@ -142,11 +106,6 @@
 		font-size: 0.8rem;
 		color: var(--ink-soft);
 		font-weight: 600;
-	}
-
-	.copy-btn {
-		font-size: 0.8rem;
-		padding: 8px 16px;
 	}
 
 	.grocery-list {
