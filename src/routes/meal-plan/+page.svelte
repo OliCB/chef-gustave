@@ -44,8 +44,8 @@
 		goto(`/meal-plan${params}`);
 	}
 
-	function getEntry(date: string, mealType: string) {
-		return data.entries.find(
+	function getEntries(date: string, mealType: string) {
+		return data.entries.filter(
 			(e: any) => e.date === date && e.meal_type === mealType
 		);
 	}
@@ -110,21 +110,22 @@
 			<div class="day-date">{new Date(day.date + 'T00:00:00').toLocaleDateString('fr-CA', { day: 'numeric', month: 'short' })}</div>
 
 			{#each MEAL_TYPES as mealType}
-				{@const entry = getEntry(day.date, mealType)}
+				{@const entries = getEntries(day.date, mealType)}
 				<div class="meal-slot">
 					<span class="meal-label">{mealType}</span>
-					{#if entry}
-						<div class="meal-filled">
-							<a href="/recipes/{entry.recipe?.id || entry.recipe_id}" class="meal-recipe">
-								{entry.recipe?.name || '…'}
-							</a>
-							<button class="meal-remove" onclick={() => removeEntry(entry.id)}>×</button>
-						</div>
-					{:else}
+					<div class="meal-entries">
+						{#each entries as entry}
+							<div class="meal-filled">
+								<a href="/recipes/{entry.recipe?.id || entry.recipe_id}" class="meal-recipe">
+									{entry.recipe?.name || '…'}
+								</a>
+								<button class="meal-remove" onclick={() => removeEntry(entry.id)}>×</button>
+							</div>
+						{/each}
 						<button class="meal-empty" onclick={() => openPicker(day.date, mealType)}>
 							+
 						</button>
-					{/if}
+					</div>
 				</div>
 			{/each}
 		</div>
@@ -245,8 +246,14 @@
 		min-width: 70px;
 	}
 
-	.meal-filled {
+	.meal-entries {
 		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	.meal-filled {
 		display: flex;
 		align-items: center;
 		gap: 6px;
@@ -274,8 +281,9 @@
 	}
 
 	.meal-empty {
-		flex: 1;
+		width: 100%;
 		height: 32px;
+		flex-shrink: 0;
 		border-radius: 8px;
 		background: rgba(58, 107, 53, 0.04);
 		color: var(--sage);
