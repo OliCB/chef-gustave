@@ -137,10 +137,10 @@ async function getOrCreateIngredient(name: string): Promise<string> {
 
 	if (existing) return existing.id;
 
-	// Create new
+	// Create new — on conflict (race condition), just select again
 	const { data: created, error } = await db
 		.from('ingredients')
-		.insert({ name: normalized })
+		.upsert({ name: normalized }, { onConflict: 'name' })
 		.select('id')
 		.single();
 

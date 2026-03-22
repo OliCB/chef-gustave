@@ -1,5 +1,6 @@
 <script lang="ts">
 	import RecipeForm from '$lib/components/RecipeForm.svelte';
+	import { toast } from '$lib/toast';
 	import type { Recipe } from '$lib/types';
 
 	let { data } = $props();
@@ -7,57 +8,59 @@
 	let mode = $state<'manual' | 'import'>('manual');
 	let importUrl = $state('');
 	let importing = $state(false);
-	let importError = $state('');
 	let importedRecipe = $state<Partial<Recipe> | null>(null);
 
-	async function handleImport() {
-		if (!importUrl.trim()) return;
-		importing = true;
-		importError = '';
+	function parseImportResponse(recipe: any): Partial<Recipe> {
+		return {
+			name: recipe.name,
+			servings: recipe.servings,
+			prep_time: recipe.prep_time,
+			cook_time: recipe.cook_time,
+			source_url: recipe.source_url,
+			notes: recipe.notes,
+			ingredients: recipe.ingredients?.map((i: any, idx: number) => ({
+				ingredient_id: '',
+				name: i.name,
+				quantity: i.quantity,
+				unit: i.unit,
+				position: idx
+			})) || [],
+			steps: recipe.steps?.map((s: string, idx: number) => ({
+				instruction: s,
+				position: idx
+			})) || [],
+			tags: recipe.tags?.map((t: string) => ({
+				id: '',
+				name: t
+			})) || []
+		};
+	}
 
+	async function runImport(body: object) {
+		importing = true;
 		try {
 			const res = await fetch('/api/recipes/import', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ url: importUrl })
+				body: JSON.stringify(body)
 			});
-
 			if (!res.ok) {
 				const data = await res.json().catch(() => ({}));
-				importError = data.message || "Erreur lors de l'importation";
+				toast.error(data.message || "Erreur lors de l'importation");
 				return;
 			}
-
-			const recipe = await res.json();
-			importedRecipe = {
-				name: recipe.name,
-				servings: recipe.servings,
-				prep_time: recipe.prep_time,
-				cook_time: recipe.cook_time,
-				source_url: recipe.source_url,
-				notes: recipe.notes,
-				ingredients: recipe.ingredients?.map((i: any, idx: number) => ({
-					ingredient_id: '',
-					name: i.name,
-					quantity: i.quantity,
-					unit: i.unit,
-					position: idx
-				})) || [],
-				steps: recipe.steps?.map((s: string, idx: number) => ({
-					instruction: s,
-					position: idx
-				})) || [],
-				tags: recipe.tags?.map((t: string) => ({
-					id: '',
-					name: t
-				})) || []
-			};
+			importedRecipe = parseImportResponse(await res.json());
 			mode = 'manual';
 		} catch {
-			importError = "Erreur lors de l'importation";
+			toast.error("Erreur lors de l'importation");
 		} finally {
 			importing = false;
 		}
+	}
+
+	function handleImport() {
+		if (!importUrl.trim()) return;
+		runImport({ url: importUrl });
 	}
 </script>
 
@@ -76,7 +79,7 @@
 
 {#if mode === 'import'}
 	<div class="import-section">
-		<div class="vine"><span>Importer</span></div>
+		<div class="vine"><span>Importer une URL</span></div>
 		<div class="import-form">
 			<input
 				type="url"
@@ -92,9 +95,6 @@
 				{importing ? 'Importation…' : 'Importer'}
 			</button>
 		</div>
-		{#if importError}
-			<p class="error">{importError}</p>
-		{/if}
 		{#if importing}
 			<p class="importing-msg">Analyse de la recette en cours…</p>
 		{/if}
